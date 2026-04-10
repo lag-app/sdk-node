@@ -30,9 +30,12 @@ jobs:
       - name: Build
         run: npm run build
       - name: Publish
-        run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        # npm trusted publishing (OIDC) requires npm >= 11.5.1, so we
+        # invoke the latest npm via npx for the publish step. The bundled
+        # npm 10.x is fine for everything else. Both --provenance and
+        # OIDC trusted publishing require the source GitHub repo to be
+        # public.
+        run: npx --yes npm@latest publish --provenance --access public
       - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
