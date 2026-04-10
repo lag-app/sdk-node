@@ -1,0 +1,54 @@
+{
+  "name": "@lag/sdk",
+  "version": "0.1.0",
+  "description": "Official TypeScript/Node SDK for the Lag API",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import tsx --test \"test/**/*.test.ts\"",
+    "prepublishOnly": "npm run build"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "lag",
+    "trylag",
+    "api",
+    "sdk",
+    "client",
+    "rest"
+  ],
+  "homepage": "https://trylag.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lag-app/sdk-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lag-app/sdk-node/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0"
+  }
+}
