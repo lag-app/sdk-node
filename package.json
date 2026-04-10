@@ -1,5 +1,5 @@
 {
-  "name": "@lag/sdk",
+  "name": "@lagapp/sdk",
   "version": "0.1.0",
   "description": "Official TypeScript/Node SDK for the Lag API",
   "license": "MIT",

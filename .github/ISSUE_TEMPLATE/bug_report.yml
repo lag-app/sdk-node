@@ -10,7 +10,7 @@ body:
     id: sdk-version
     attributes:
       label: SDK version
-      description: Output of `npm list @lag/sdk` or the version pinned in your `package.json`.
+      description: Output of `npm list @lagapp/sdk` or the version pinned in your `package.json`.
       placeholder: "0.1.0"
     validations:
       required: true

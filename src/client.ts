@@ -14,7 +14,7 @@ import { ImagesResource } from './resources/images.js';
  * `lag_pat_*`, or a Supabase JWT) and access resources off the instance:
  *
  *   ```ts
- *   import { LagClient } from '@lag/sdk';
+ *   import { LagClient } from '@lagapp/sdk';
  *
  *   const client = new LagClient({ token: process.env.LAG_TOKEN! });
  *   const me = await client.users.me();

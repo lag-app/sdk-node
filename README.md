@@ -1,8 +1,8 @@
-# @lag/sdk
+# @lagapp/sdk
 
 The official TypeScript / Node SDK for the [Lag](https://trylag.com) API.
 
-`@lag/sdk` is a small, hand-written REST client for the public Lag API. It
+`@lagapp/sdk` is a small, hand-written REST client for the public Lag API. It
 covers users, friends, DMs, servers, rooms, room messages, events, and image
 uploads. It does **not** include the WebSocket protocol or the voice client -
 those are out of scope for this package.
@@ -15,17 +15,17 @@ those are out of scope for this package.
 ## Install
 
 ```bash
-npm install @lag/sdk
+npm install @lagapp/sdk
 # or
-pnpm add @lag/sdk
+pnpm add @lagapp/sdk
 # or
-yarn add @lag/sdk
+yarn add @lagapp/sdk
 ```
 
 ## Quickstart
 
 ```ts
-import { LagClient } from '@lag/sdk';
+import { LagClient } from '@lagapp/sdk';
 
 const client = new LagClient({
   token: process.env.LAG_TOKEN!, // a Personal Access Token (lag_pat_*) or Supabase JWT
@@ -126,7 +126,7 @@ The same pattern works for room messages via
 
 ```ts
 import { readFileSync } from 'node:fs';
-import { LagClient } from '@lag/sdk';
+import { LagClient } from '@lagapp/sdk';
 
 const client = new LagClient({ token: process.env.LAG_TOKEN! });
 
@@ -163,7 +163,7 @@ import {
   LagRateLimitError,
   LagServerError,
   LagConnectionError,
-} from '@lag/sdk';
+} from '@lagapp/sdk';
 
 try {
   await client.servers.get('does-not-exist');
