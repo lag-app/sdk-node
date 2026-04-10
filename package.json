@@ -21,7 +21,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test test/*.test.ts",
+    "test": "node scripts/run-tests.mjs",
     "prepublishOnly": "npm run build"
   },
   "engines": {
