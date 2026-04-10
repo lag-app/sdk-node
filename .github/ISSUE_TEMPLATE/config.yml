@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Lag documentation
+    url: https://trylag.com/docs
+    about: Read the official Lag documentation.
+  - name: Security vulnerability
+    url: https://github.com/lag-app/sdk-node/security/advisories/new
+    about: Report a security issue privately. Do not open a public issue.
