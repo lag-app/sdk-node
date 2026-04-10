@@ -1,5 +1,10 @@
 # @lagapp/sdk
 
+[![npm version](https://img.shields.io/npm/v/@lagapp/sdk.svg)](https://www.npmjs.com/package/@lagapp/sdk)
+[![CI](https://github.com/lag-app/sdk-node/actions/workflows/ci.yml/badge.svg)](https://github.com/lag-app/sdk-node/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
+[![Node](https://img.shields.io/node/v/@lagapp/sdk.svg)](https://www.npmjs.com/package/@lagapp/sdk)
+
 The official TypeScript / Node SDK for the [Lag](https://trylag.com) API.
 
 `@lagapp/sdk` is a small, hand-written REST client for the public Lag API. It
