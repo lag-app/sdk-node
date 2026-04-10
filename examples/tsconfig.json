@@ -1,0 +1,12 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "rootDir": "..",
+    "paths": {
+      "@lagapp/sdk": ["../src/index.ts"]
+    },
+    "types": ["node"]
+  },
+  "include": ["./*.ts"]
+}
