@@ -109,6 +109,21 @@ export class LagConnectionError extends LagApiError {
 }
 
 /**
+ * Raised client-side when an SDK method is called with an incompatible
+ * token kind. The Lag SDK accepts both Personal Access Tokens
+ * (`lag_pat_*`) and robot API keys (`lag_robot_*`); some methods are not
+ * available to robots (e.g. `users.me()` returns a User shape that does
+ * not exist for robots), so the SDK throws this error before making the
+ * request rather than surfacing an opaque API failure.
+ */
+export class LagInvalidTokenError extends LagApiError {
+  constructor(message: string) {
+    super(message, 0, 'invalid_token', null, null);
+    this.name = 'LagInvalidTokenError';
+  }
+}
+
+/**
  * Build the appropriate `LagApiError` subclass for an HTTP response.
  *
  * The Lag API always returns a JSON error envelope, but we still defend

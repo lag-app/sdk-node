@@ -33,11 +33,11 @@ yarn add @lagapp/sdk
 import { LagClient } from '@lagapp/sdk';
 
 const client = new LagClient({
-  token: process.env.LAG_TOKEN!, // a Personal Access Token (lag_pat_*) or Supabase JWT
+  token: process.env.LAG_TOKEN!, // a PAT (lag_pat_*) or robot key (lag_robot_*)
 });
 
-const me = await client.users.me();
-console.log(`Hello, ${me.displayName ?? me.username}`);
+const who = await client.identity();
+console.log(`Hello, ${who.displayName}`);
 
 const servers = await client.servers.list();
 for (const server of servers) {
@@ -47,17 +47,68 @@ for (const server of servers) {
 
 ## Authentication
 
-The SDK accepts any Bearer token the API would accept:
+The SDK accepts two credential types and auto-detects which one you passed:
 
-- A **Personal Access Token** (`lag_pat_*`) - the recommended option for
-  scripts, bots, and CI. Create one in the Lag web app under settings, or via
-  the `lag` CLI with `lag auth login`.
-- A **Supabase JWT** - useful when you already have an authenticated session,
-  e.g. inside a SvelteKit server load function.
+- A **Personal Access Token** (`lag_pat_*`) - for scripts, CI, and any code
+  acting on behalf of a real user. Create one in the Lag web app under
+  settings, or via the `lag` CLI with `lag auth login`. Sent as
+  `Authorization: Bearer <token>`.
+- A **Robot API key** (`lag_robot_*`) - for bots and integrations that act
+  as their own server-scoped identity. Create one when you create a robot
+  on a server. Sent as `Authorization: Robot <key>`.
 
-The token is sent as `Authorization: Bearer <token>` on every request. The SDK
-does not implement OAuth flows, refresh tokens, or browser-based login - if
-you need any of those, obtain a token elsewhere and pass it in.
+Both types are passed via the same `token` field:
+
+```ts
+// As a user:
+const userClient = new LagClient({ token: 'lag_pat_...' });
+
+// As a robot:
+const botClient = new LagClient({ token: 'lag_robot_abcd1234_...' });
+```
+
+The SDK does not implement OAuth flows, refresh tokens, or browser-based
+login - obtain a token elsewhere and pass it in.
+
+### Robots
+
+Robot keys are scoped to a single server and have a fixed permission set.
+The SDK switches the auth scheme to `Robot` automatically and routes
+server-scoped actions to the robot endpoints under the hood, so the same
+resource methods work for both users and robots:
+
+```ts
+import { LagClient } from '@lagapp/sdk';
+
+const bot = new LagClient({ token: 'lag_robot_abcd1234_...' });
+
+const me = await bot.identity(); // GET /robots/@me/info
+console.log(me.displayName, me.permissions);
+
+// Same API as a user, but routed to /robots/@me/servers/...
+await bot.servers.rooms.messages.send(me.serverId!, 'room_id', {
+  content: 'Hello from a robot',
+});
+
+const page = await bot.servers.rooms.messages.list(me.serverId!, 'room_id');
+for (const msg of page.messages) {
+  // ...
+}
+```
+
+Methods supported with a robot key:
+
+- `client.identity()`
+- `client.servers.rooms.list(serverId)`
+- `client.servers.members.list(serverId)`
+- `client.servers.rooms.messages.list(serverId, roomId, ...)`
+- `client.servers.rooms.messages.send(serverId, roomId, ...)`
+- `client.servers.rooms.messages.edit(serverId, roomId, messageId, ...)`
+- `client.servers.rooms.messages.delete(serverId, roomId, messageId)`
+
+Methods that have no robot equivalent (`users.me()`, friends, DMs, events,
+image uploads) throw `LagInvalidTokenError` upfront when called with a
+robot key, or return `401`/`403` from the API.
 
 ## Configuration
 
@@ -168,6 +219,7 @@ import {
   LagRateLimitError,
   LagServerError,
   LagConnectionError,
+  LagInvalidTokenError,
 } from '@lagapp/sdk';
 
 try {

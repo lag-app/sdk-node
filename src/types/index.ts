@@ -1,4 +1,5 @@
 export * from './common.js';
+export * from './identity.js';
 export * from './user.js';
 export * from './friend.js';
 export * from './dm.js';

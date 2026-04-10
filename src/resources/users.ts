@@ -1,4 +1,5 @@
 import type { HttpClient } from '../http.js';
+import { LagInvalidTokenError } from '../errors.js';
 import type {
   AvatarUploadBody,
   AvatarUploadResponse,
@@ -11,20 +12,29 @@ import type {
   User,
 } from '../types/user.js';
 
+const ROBOT_ME_MESSAGE =
+  'users.me() is not available with a robot API key. ' +
+  'Use client.identity() instead - it returns a unified Identity that ' +
+  'works for both user tokens and robot keys.';
+
 /**
  * Users resource. Covers the calling user's own profile (`/users/me/*`) and
  * lookups for other users (`/users/:id`, `/users/search`, `/users/check-username`).
  *
- * Setup-related endpoints (`/users/me/setup`) and Steam integration are also
- * exposed since they belong to the public user-facing surface, but they will
- * only succeed for callers using a Supabase JWT (PATs are issued *after*
- * setup is complete).
+ * The methods on this resource require a user Personal Access Token. When
+ * the client is configured with a robot API key, `me()` throws
+ * `LagInvalidTokenError` upfront; the others will return `401` from the
+ * API. Use `client.identity()` for a robot-compatible alternative to
+ * `me()`.
  */
 export class UsersResource {
   constructor(private readonly http: HttpClient) {}
 
   /** GET /users/me - the currently authenticated user. */
   me(): Promise<User> {
+    if (this.http.isRobot) {
+      return Promise.reject(new LagInvalidTokenError(ROBOT_ME_MESSAGE));
+    }
     return this.http.request<User>({ method: 'GET', path: '/users/me' });
   }
 

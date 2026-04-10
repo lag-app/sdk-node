@@ -10,6 +10,7 @@ export {
   LagRateLimitError,
   LagServerError,
   LagConnectionError,
+  LagInvalidTokenError,
 } from './errors.js';
 export type { LagApiErrorBody } from './errors.js';
 

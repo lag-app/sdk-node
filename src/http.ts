@@ -8,7 +8,12 @@ import {
 import { USER_AGENT } from './version.js';
 
 export interface LagClientOptions {
-  /** Bearer token: a Personal Access Token (lag_pat_*) or Supabase JWT. */
+  /**
+   * Credential for the API. Either a user Personal Access Token
+   * (`lag_pat_*`) or a robot API key (`lag_robot_*`). The SDK detects the
+   * prefix and switches the Authorization scheme to `Bearer` or `Robot`
+   * automatically.
+   */
   token: string;
   /** API base URL. Defaults to `https://api.trylag.com`. */
   baseUrl?: string;
@@ -20,6 +25,36 @@ export interface LagClientOptions {
   userAgent?: string;
   /** Custom fetch implementation (defaults to global fetch). */
   fetch?: typeof fetch;
+}
+
+const ROBOT_TOKEN_PREFIX = 'lag_robot_';
+const ROBOT_PATH_PREFIX = '/robots/@me';
+
+function detectAuthMode(token: string): { scheme: 'Bearer' | 'Robot'; isRobot: boolean } {
+  if (token.startsWith(ROBOT_TOKEN_PREFIX)) {
+    return { scheme: 'Robot', isRobot: true };
+  }
+  return { scheme: 'Bearer', isRobot: false };
+}
+
+/**
+ * Rewrite a user-style path to its `/robots/@me` equivalent.
+ *
+ * Robot keys are scoped to a single server and only have endpoints under
+ * `/robots/@me`. The robot routes mirror the user routes for the
+ * operations a robot can perform (sending, editing, deleting messages,
+ * listing rooms / members / message history), so prepending the prefix is
+ * enough to make existing resource methods work transparently.
+ *
+ * Paths that have no robot equivalent are passed through unchanged and
+ * will return 401/403/404/405 from the API.
+ */
+function rewriteRobotPath(path: string): string {
+  if (path.startsWith(ROBOT_PATH_PREFIX)) return path;
+  if (path === '/servers' || path.startsWith('/servers/')) {
+    return ROBOT_PATH_PREFIX + path;
+  }
+  return path;
 }
 
 export interface RequestOptions {
@@ -59,12 +94,18 @@ export class HttpClient {
   private readonly maxRetries: number;
   private readonly userAgent: string;
   private readonly fetchImpl: typeof fetch;
+  private readonly authScheme: 'Bearer' | 'Robot';
+  /** True when the configured token is a robot API key (`lag_robot_*`). */
+  public readonly isRobot: boolean;
 
   constructor(opts: LagClientOptions) {
     if (!opts.token || typeof opts.token !== 'string') {
       throw new TypeError('LagClient: `token` is required');
     }
     this.token = opts.token;
+    const { scheme, isRobot } = detectAuthMode(opts.token);
+    this.authScheme = scheme;
+    this.isRobot = isRobot;
     this.baseUrl = (opts.baseUrl ?? DEFAULT_BASE_URL).replace(/\/+$/, '');
     this.timeoutMs = opts.timeoutMs ?? DEFAULT_TIMEOUT_MS;
     this.maxRetries = opts.maxRetries ?? DEFAULT_MAX_RETRIES;
@@ -138,7 +179,10 @@ export class HttpClient {
     path: string,
     query?: Record<string, string | number | boolean | null | undefined>,
   ): string {
-    const normalized = path.startsWith('/') ? path : `/${path}`;
+    let normalized = path.startsWith('/') ? path : `/${path}`;
+    if (this.isRobot) {
+      normalized = rewriteRobotPath(normalized);
+    }
     const url = new URL(this.baseUrl + normalized);
     if (query) {
       for (const [key, value] of Object.entries(query)) {
@@ -151,7 +195,7 @@ export class HttpClient {
 
   private buildHeaders(opts: RequestOptions): Headers {
     const headers = new Headers({
-      Authorization: `Bearer ${this.token}`,
+      Authorization: `${this.authScheme} ${this.token}`,
       Accept: 'application/json',
       'User-Agent': this.userAgent,
     });
