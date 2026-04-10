@@ -9,6 +9,13 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    # Force bash on every platform so glob expansion in npm scripts
+    # (e.g. test/*.test.ts) works the same way everywhere. Windows
+    # runners ship with Git Bash, which is what `bash` resolves to.
+    shell: bash
+
 jobs:
   test:
     name: Test (Node ${{ matrix.node }} on ${{ matrix.os }})
